@@ -13,6 +13,7 @@ season_id_by_competition_id = {
 def main():
     pwd = os.environ['POSTGRES_PWD']
     setup_database('postgres', pwd)
+    create_tables()
     iterateOverMatches()
     
     db_conn.close()
@@ -36,9 +37,9 @@ def setup_database(user, pwd):
 def create_tables():
     with db_conn.cursor() as cursor:
         cursor.execute('DROP TABLE IF EXISTS players')
-        table_creation = "CREATE TABLE players (player_id PRIMARY KEY, player_name TEXT NOT NULL, jersey_number INT NOT NULL, country_name TEXT NOT NULL);"
-        cursor.execute(table_creation)
-        
+        table_creation = 'CREATE TABLE players (player_id NOT NULL, player_name TEXT NOT NULL, team_name TEXT NOT NULL, jersey_number INT NOT NULL, country_name TEXT NOT NULL);'
+        cursor.execute('CREATE TABLE players (player_id INTEGER PRIMARY KEY, player_name TEXT NOT NULL, team_name TEXT NOT NULL, jersey_number INT NOT NULL, country_name TEXT NOT NULL);')
+
         db_conn.commit()
 
 def iterateOverMatches():
@@ -68,12 +69,14 @@ def load_lineup_data(match_id):
     f = open(lineup_filename)
 
     lineup_data = json.load(f)
-    for team in lineup_data:
-        print(team['team_name'])
-        for player in team['lineup']:
-            print('\t'+player['player_name'])
-
-
+    with db_conn.cursor() as cursor:
+        for team in lineup_data:
+            print(team['team_name'])
+            for player in team['lineup']:
+                print('\t'+player['player_name'])
+                # cursor.execute('INSERT INTO players (player_id, player_name, team_name, jersey_number, country_name)')
+                cursor.execute('''INSERT INTO players VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING''', (player['player_id'], player['player_name'], team['team_name'], player['jersey_number'], player['country']['name']))
+        db_conn.commit()
     f.close()
 
 
