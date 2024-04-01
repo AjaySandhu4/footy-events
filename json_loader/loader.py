@@ -3,8 +3,8 @@ from pprint import pprint
 # import sys
 import os
 import json
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
+from initial_loader import *
+from event_loaders import *
 
 season_id_by_competition_id = {
     '2': ['44'],
@@ -18,88 +18,22 @@ season_name_by_season_id = {
     '4': 'La Liga 2018/2019',
 }
 
+event_loaders = {
+    'Shot': load_shot,
+    'Pass': load_pass,
+    'Dribble': load_dribble,
+}
+
 
 def main():
-    print(dir_path)
-    pwd = os.environ['POSTGRES_PWD']
-    setup_database('postgres', pwd)
-    create_tables()
-    insert_competitions()
-    iterate_over_matches()
+    db_conn = init()
+    insert_competitions(db_conn)
+    iterate_over_matches(db_conn)
     db_conn.commit()
-    # test_Q1()
     db_conn.close()
 
-# Creates database 'a3' and creates global connection to it
-def setup_database(user, pwd):
-    try:
-        with psycopg.connect(f'dbname=postgres user={user} password={pwd} host=localhost port=5432', autocommit=True) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute('DROP DATABASE IF EXISTS project_test')
-                cursor.execute('CREATE DATABASE project_test')
 
-        global db_conn
-        db_conn = psycopg.connect(
-                f'dbname=project_test user={user} password={pwd} host=localhost port=5432'
-        )
-    except psycopg.OperationalError as e:
-        print('Failed to connect to database', e)
-        exit(1)
-
-def create_tables():
-    with db_conn.cursor() as cursor:
-        with open(os.path.join(dir_path, 'create_tables.sql')) as f:
-            cursor.execute(f.read())
-        # cursor.execute('DROP TABLE IF EXISTS players')
-        # cursor.execute('''
-                    #    CREATE TABLE players 
-                    #    (
-                    #     player_id INTEGER PRIMARY KEY, 
-                    #     player_name TEXT NOT NULL, 
-                    #     team_name TEXT NOT NULL, 
-                    #     jersey_number INT NOT NULL, 
-                    #     country_name TEXT NOT NULL
-                    #    );
-        #                ''')
-        # cursor.execute('DROP TABLE IF EXISTS shots')
-        # cursor.execute(''' 
-        #                 CREATE TABLE shots
-        #                 (
-        #                  event_id CHAR(36) PRIMARY KEY,
-        #                  season_name CHAR(24) NOT NULL,
-        #                  match_id INTEGER NOT NULL,
-        #                  player_name TEXT NOT NULL,
-        #                  xg DECIMAL NOT NULL
-        #                 );
-        #                 ''')
-        # cursor.execute(''' 
-        #                 DROP TABLE IF EXISTS players;
-        #                 CREATE TABLE players 
-        #                 (
-        #                 player_id INTEGER PRIMARY KEY, 
-        #                 player_name TEXT NOT NULL, 
-        #                 team_name TEXT NOT NULL, 
-        #                 jersey_number INT NOT NULL, 
-        #                 country_name TEXT NOT NULL
-        #                 );
-        #                 DROP TABLE IF EXISTS shots;
-        #                 CREATE TABLE shots
-        #                 (
-        #                  event_id CHAR(36) PRIMARY KEY,
-        #                  season_name CHAR(24) NOT NULL,
-        #                  match_id INTEGER NOT NULL,
-        #                  player_name TEXT NOT NULL,
-        #                  xg DECIMAL NOT NULL
-        #                 );
-        #                 ''')
-        # cursor.execute(''' 
-        #         CREATE TABLE shots
-        #         (
-        #             event_id TEXT PRIMARY KEY
-        #         );
-        #         ''')
-
-def insert_competitions():
+def insert_competitions(db_conn):
     with open(os.path.join(dir_path, 'open-data/data/competitions.json')) as competitions_file:
         competitions_data = json.load(competitions_file)
         with db_conn.cursor() as cursor:
@@ -120,7 +54,7 @@ def insert_competitions():
                      competition['competition_youth'],
                      competition['competition_international']))
 
-def iterate_over_matches():
+def iterate_over_matches(db_conn):
     print('Iterating over matches')
     directory = os.path.join(dir_path, 'open-data/data/matches')
     for competition_id in os.listdir(directory):
@@ -131,9 +65,9 @@ def iterate_over_matches():
                 season_id = season_file.strip('.json')
                 if season_id in season_id_by_competition_id[competition_id]:
                     print(season_id)
-                    load_season_data(os.path.join(competition_directory, season_file), season_name_by_season_id[season_id])
+                    load_season_data(db_conn, os.path.join(competition_directory, season_file), season_name_by_season_id[season_id])
 
-def load_season_data(season_file, season_name):
+def load_season_data(db_conn, season_file, season_name):
     print(season_name)
     f = open(season_file)
 
@@ -141,12 +75,12 @@ def load_season_data(season_file, season_name):
 
     for match in season_data:
         match_id = match['match_id']
-        load_match_data(match)
-        load_lineup_data(match_id) 
-        load_event_data(match_id, season_name)
+        load_match_data(db_conn, match)
+        load_lineup_data(db_conn, match_id) 
+        load_event_data(db_conn, match_id, season_name)
     f.close()
 
-def load_match_data(match):
+def load_match_data(db_conn, match):
     with db_conn.cursor() as cursor:
         cursor.execute('''INSERT INTO team (team_id, team_name, team_country) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;''', (match['home_team']['home_team_id'], match['home_team']['home_team_name'], match['home_team']['country']['name']))
         cursor.execute('''INSERT INTO team (team_id, team_name, team_country) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;''', (match['away_team']['away_team_id'], match['away_team']['away_team_name'], match['away_team']['country']['name']))
@@ -173,7 +107,7 @@ def load_match_data(match):
             match['competition_stage']['name'],
         ))
 
-def load_lineup_data(match_id):
+def load_lineup_data(db_conn, match_id):
     print('Loading lineup')
     lineup_filename = os.path.join(dir_path, 'open-data/data/lineups', str(match_id)+'.json')
     f = open(lineup_filename)
@@ -188,8 +122,7 @@ def load_lineup_data(match_id):
                 cursor.execute('''INSERT INTO player VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING;''', (player['player_id'], player['player_name'], player['player_nickname'], player['country']['name']))
     f.close()
 
-
-def load_event_data(match_id, season_name):
+def load_event_data(db_conn, match_id, season_name):
     # event_filename = os.path.join('/Users/ajay/Documents/COMP3005/project/open-data/data/events', str(match_id)+'.json')
     event_filename = os.path.join(dir_path, 'open-data/data/events', str(match_id)+'.json')
     f = open(event_filename)
@@ -218,8 +151,9 @@ def load_event_data(match_id, season_name):
                     duration, 
                     under_pressure, 
                     off_camera, 
-                    ball_out
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ball_out,
+                    counterpress
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ''', (
                 event['id'], 
                 match_id, 
@@ -228,7 +162,7 @@ def load_event_data(match_id, season_name):
                 event['period'],
                 event['minute'], 
                 event['second'], 
-                event['type']['name'], 
+                event_type, 
                 event['possession'],
                 event['possession_team']['id'], 
                 event['play_pattern']['name'], 
@@ -240,66 +174,32 @@ def load_event_data(match_id, season_name):
                 event.get('duration', None), 
                 event.get('under_pressure', None),
                 event.get('off_camera', None), 
-                event.get('ball_out', None)
+                event.get('ball_out', None),
+                event.get('counterpress', None)
             ))
         if event_type in event_loaders:
-            event_loaders[event_type](event['id'], event[event_type.lower()], match_id, season_name)
-
-
-
-def load_shot(event_id, shot_event, match_id, season_name):
-    with db_conn.cursor() as cursor:
-        # cursor.execute('''INSERT INTO shot (event_id, match_id, season_name, player_name, xg) VALUES (%s, %s, %s, %s, %s);''', (shot_event['id'], match_id, season_name, shot_event['player']['name'], shot_event['shot']['statsbomb_xg']))
-        cursor.execute('''
-            INSERT INTO shot (
-            event_id, 
-            key_pass_id, 
-            end_location_x, 
-            end_location_y, 
-            end_location_z, 
-            aerial_won, 
-            follows_dribble, 
-            first_time, 
-            open_goal, 
-            statsbomb_xg, 
-            deflected, 
-            technique, 
-            body_part, 
-            shot_type, 
-            outcome
-            ) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ''', (
-            event_id, 
-            shot_event.get('key_pass_id'), 
-            shot_event.get('end_location')[0] if shot_event.get('end_location') else None, 
-            shot_event.get('end_location')[1] if shot_event.get('end_location') else None, 
-            shot_event.get('end_location')[2] if shot_event.get('end_location') and len(shot_event.get('end_location')) > 2 else None, 
-            shot_event.get('aerial_won'), 
-            shot_event.get('follows_dribble'), 
-            shot_event.get('first_time'), 
-            shot_event.get('open_goal'), 
-            shot_event.get('statsbomb_xg'), 
-            shot_event.get('deflected'), 
-            shot_event.get('technique', {}).get('name'), 
-            shot_event.get('body_part', {}).get('name'), 
-            shot_event.get('type', {}).get('name'), 
-            shot_event.get('outcome', {}).get('name')
-        ))
+            event_loaders[event_type](db_conn, event['id'], event[event_type.lower()], match_id, season_name)
 
 def testQ1():
     with db_conn.cursor() as cursor:
-        cursor.execute('''SELECT player_name, AVG(xg) as avg_xg
-            FROM shots
-            WHERE season_name = 'La Liga 2020/2021'
-            GROUP BY player_name
-            ORDER BY avg_xg DESC; 
-        ''')
-        
-
-event_loaders = {
-    'Shot': load_shot
-}
+        # cursor.execute('''SELECT player_name, AVG(xg) as avg_xg
+        #     FROM shots
+        #     WHERE season_name = 'La Liga 2020/2021'
+        #     GROUP BY player_name
+        #     ORDER BY avg_xg DESC; 
+        # ''')
+        cursor.execute('''  
+                            SELECT p.player_name, AVG(s.statsbomb_xg) as avg_xg
+                            FROM shot s
+                            INNER JOIN events e ON s.event_id = e.event_id
+                            INNER JOIN player p ON e.player_id = p.player_id
+                            INNER JOIN matches m ON e.match_id = m.match_id
+                            INNER JOIN competition c ON m.competition_id = c.competition_id
+                                    AND m.season_id = c.season_id
+                            WHERE c.competition_name = 'La Liga' AND c.season_name = '2020/2021'
+                            GROUP BY p.player_id
+                            ORDER BY avg_xg DESC; 
+                       ''')
 
 if __name__ == '__main__':
     main()

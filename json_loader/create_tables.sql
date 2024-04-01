@@ -80,6 +80,7 @@ CREATE TABLE events (
     off_camera BOOLEAN,
     ball_out BOOLEAN,
     -- related_events CHAR(36),
+    counterpress BOOLEAN,
 
     FOREIGN KEY (match_id) REFERENCES matches (match_id),
     FOREIGN KEY (player_id) REFERENCES player (player_id)
@@ -110,47 +111,51 @@ CREATE TABLE shot (
     FOREIGN KEY (key_pass_id) REFERENCES events (event_id)
 );
 
--- DROP TABLE IF EXISTS pass;
--- CREATE TABLE pass (
---     event_id CHAR(36) PRIMARY KEY,
---     match_id INTEGER NOT NULL,
---     season_name CHAR(24) NOT NULL,
---     -- player_name TEXT NOT NULL,
---     recipient_name TEXT NOT NULL,
---     pass_length DECIMAL NOT NULL,
---     angle DECIMAL NOT NULL,
---     height CHAR(24) NOT NULL,
---     end_location_x DECIMAL NOT NULL,
---     end_location_y DECIMAL NOT NULL,
---     is_cross BOOLEAN,
---     switch BOOLEAN,
---     shot_assist BOOLEAN,
---     cutback BOOLEAN,
---     backheel BOOLEAN,
---     deflected BOOLEAN,
---     miscommunication BOOLEAN,
---     outcome CHAR(10),
---     body_part CHAR(24),
---     pass_type CHAR(24),
---     technique CHAR(24),
+DROP TABLE IF EXISTS pass;
+CREATE TABLE pass (
+    event_id CHAR(36) PRIMARY KEY,
+    -- match_id INTEGER NOT NULL,
+    -- season_name CHAR(24) NOT NULL,
+    -- player_name TEXT NOT NULL,
+    recipient_id INTEGER,
+    pass_length DECIMAL NOT NULL,
+    angle DECIMAL NOT NULL,
+    height CHAR(24) NOT NULL,
+    end_location_x DECIMAL NOT NULL,
+    end_location_y DECIMAL NOT NULL,
+    is_cross BOOLEAN,
+    switch BOOLEAN,
+    shot_assist BOOLEAN,
+    goal_assist BOOLEAN,
+    cutback BOOLEAN,
+    backheel BOOLEAN,
+    deflected BOOLEAN,
+    miscommunication BOOLEAN,
+    outcome CHAR(16),
+    body_part CHAR(24),
+    pass_type CHAR(24),
+    technique CHAR(24),
 
---     FOREIGN KEY (event_id) REFERENCES events (event_id)
--- );
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
 
--- DROP TABLE IF EXISTS dribble;
--- CREATE TABLE dribble (
---     event_id CHAR(36) PRIMARY KEY,
---     match_id INTEGER NOT NULL,
---     outcome CHAR(24) NOT NULL,
---     overrun BOOLEAN,
---     no_touch BOOLEAN
--- );
+DROP TABLE IF EXISTS dribble;
+CREATE TABLE dribble (
+    event_id CHAR(36) PRIMARY KEY,
+    outcome CHAR(24) NOT NULL,
+    overrun BOOLEAN,
+    nutmeg BOOLEAN,
+    no_touch BOOLEAN,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
 
 -- DROP TABLE IF EXISTS dribbled_past;
 -- CREATE TABLE dribbled_past (
 --     event_id CHAR(36) PRIMARY KEY,
---     match_id INTEGER NOT NULL,
---     counterpress BOOLEAN
+--     counterpress BOOLEAN,
+
+--     FOREIGN KEY (event_id) REFERENCES events (event_id)
 -- );
 
 -- CREATE TABLE ball_receipt;
