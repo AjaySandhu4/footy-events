@@ -54,6 +54,12 @@ CREATE TABLE matches (
     -- FOREIGN KEY (referee_id) REFERENCES referee (referee_id)
 );
 
+-- DROP TABLE IF EXISTS lineup;
+-- CREATE TABLE lineup (
+--     match_id INTEGER NOT NULL,
+--     team
+-- )
+
 DROP TABLE IF EXISTS events;
 CREATE TABLE events (
     event_id CHAR(36) PRIMARY KEY,
@@ -158,35 +164,166 @@ CREATE TABLE dribble (
 --     FOREIGN KEY (event_id) REFERENCES events (event_id)
 -- );
 
--- CREATE TABLE ball_receipt;
--- CREATE TABLE ball_recovery;
--- CREATE TABLE dispossessed;
--- CREATE TABLE duel;
--- CREATE TABLE camera_on;
--- CREATE TABLE block;
--- CREATE TABLE offside;
--- CREATE TABLE clearance;
--- CREATE TABLE interception;
--- CREATE TABLE pressure;
--- CREATE TABLE half_start;
--- CREATE TABLE substitution;
--- CREATE TABLE own_goal_against;
--- CREATE TABLE foul_won;
--- CREATE TABLE foul_committed;
--- CREATE TABLE goalkeeper;
--- CREATE TABLE bad_behaviour;
--- CREATE TABLE own_goal_for;
--- CREATE TABLE player_on;
--- CREATE TABLE player_off;
--- CREATE TABLE shield;
--- CREATE TABLE fifty_fifty;
--- CREATE TABLE half_end;
--- CREATE TABLE starting_xi;
--- CREATE TABLE tactical_shift;
--- CREATE TABLE error;
--- CREATE TABLE miscontrol;
--- CREATE TABLE injury_stoppage;
--- CREATE TABLE referee_ball_drop;
--- CREATE TABLE carry;
+DROP TABLE IF EXISTS bad_behaviour;
+CREATE TABLE bad_behaviour (
+    event_id CHAR(36) PRIMARY KEY,
+    card_name TEXT,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS ball_receipt;
+CREATE TABLE ball_receipt (
+    event_id CHAR(36) PRIMARY KEY,
+    outcome TEXT,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS ball_recovery;
+CREATE TABLE ball_recovery (
+    event_id CHAR(36) PRIMARY KEY,
+    offensive BOOLEAN,
+    recovery_failure BOOLEAN,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS blocks;
+CREATE TABLE blocks (
+    event_id CHAR(36) PRIMARY KEY,
+    deflection BOOLEAN,
+    offensive BOOLEAN,
+    save_block BOOLEAN,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS carry;
+CREATE TABLE carry (
+    event_id CHAR(36) PRIMARY KEY,
+    end_location_x DECIMAL,
+    end_location_y DECIMAL,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS clearance;
+CREATE TABLE clearance (
+    event_id CHAR(36) PRIMARY KEY,
+    aerial_won BOOLEAN,
+    body_part TEXT,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS duel;
+CREATE TABLE duel (
+    event_id CHAR(36) PRIMARY KEY,
+    duel_type TEXT,
+    outcome TEXT,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS foul_committed;
+CREATE TABLE foul_committed (
+    event_id CHAR(36) PRIMARY KEY,
+    offensive BOOLEAN,
+    foul_type TEXT,
+    advantage BOOLEAN,
+    penalty BOOLEAN,
+    card_name TEXT,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS foul_won;
+CREATE TABLE foul_won (
+    event_id CHAR(36) PRIMARY KEY,
+    defensive BOOLEAN,
+    advantage BOOLEAN,
+    penalty BOOLEAN,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS goalkeeper;
+CREATE TABLE goalkeeper (
+    event_id CHAR(36) PRIMARY KEY,
+    position TEXT,
+    technique TEXT,
+    body_part TEXT,
+    goalkeeper_type TEXT,
+    outcome TEXT,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS half_end;
+CREATE TABLE half_end (
+    event_id CHAR(36) PRIMARY KEY,
+    early_video_end BOOLEAN,
+    match_suspended BOOLEAN,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS half_start;
+CREATE TABLE half_start (
+    event_id CHAR(36) PRIMARY KEY,
+    late_video_start BOOLEAN,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS injury_stoppage;
+CREATE TABLE injury_stoppage (
+    event_id CHAR(36) PRIMARY KEY,
+    in_chain BOOLEAN,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS interception;
+CREATE TABLE interception (
+    event_id CHAR(36) PRIMARY KEY,
+    outcome TEXT,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS miscontrol;
+CREATE TABLE miscontrol (
+    event_id CHAR(36) PRIMARY KEY,
+    aerial_won BOOLEAN,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS player_off;
+CREATE TABLE player_off (
+    event_id CHAR(36) PRIMARY KEY,
+    permanent BOOLEAN,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS substitution;
+CREATE TABLE substitution (
+    event_id CHAR(36) PRIMARY KEY,
+    replacement_id INTEGER,
+    outcome TEXT,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS fifty_fifty;
+CREATE TABLE fifty_fifty (
+    event_id CHAR(36) PRIMARY KEY,
+    outcome TEXT,
+
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
 
                     

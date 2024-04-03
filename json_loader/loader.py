@@ -18,10 +18,87 @@ season_name_by_season_id = {
     '4': 'La Liga 2018/2019',
 }
 
-event_loaders = {
-    'Shot': load_shot,
-    'Pass': load_pass,
-    'Dribble': load_dribble,
+event_dict = {
+    'Shot': {
+        'loader': load_shot,
+        'object_name': 'shot',
+    },
+    'Pass': {
+        'loader': load_pass,
+        'object_name': 'pass',
+    },
+    'Dribble': {
+        'loader': load_dribble,
+        'object_name': 'dribble',
+    },
+    'Bad Behaviour': {
+        'loader': load_bad_behaviour,
+        'object_name': 'bad_behaviour',
+    },
+    'Ball Receipt*': {
+        'loader': load_ball_receipt,
+        'object_name': 'ball_receipt',
+    },
+    'Ball Recovery': {
+        'loader': load_ball_recovery,
+        'object_name': 'ball_recovery',
+    },
+    'Block': {
+        'loader': load_blocks,
+        'object_name': 'block',
+    },
+    'Carry': {
+        'loader': load_carry,
+        'object_name': 'carry',
+    },
+    'Clearance': {
+        'loader': load_clearance,
+        'object_name': 'clearance',
+    },
+    'Duel': {
+        'loader': load_duel,
+        'object_name': 'duel',
+    },
+    'Foul Committed': {
+        'loader': load_foul_committed,
+        'object_name': 'foul_committed',
+    },
+    'Foul Won': {
+        'loader': load_foul_won,
+        'object_name': 'foul_won',
+    },
+    'Goal Keeper': {
+        'loader': load_goalkeeper,
+        'object_name': 'goalkeeper',
+    },
+    'Half End': {
+        'loader': load_half_end,
+        'object_name': 'half_end',
+    },
+    'Half Start': {
+        'loader': load_half_start,
+        'object_name': 'half_start',
+    },
+    'Injury Stoppage': {
+        'loader': load_injury_stoppage,
+        'object_name': 'injury_stoppage',
+    },
+    'Interception': {
+        'loader': load_interception,
+        'object_name': 'interception',
+    },
+    'Miscontrol': {
+        'loader': load_miscontrol,
+        'object_name': 'miscontrol',
+    },
+    'Player Off': {
+        'loader': load_player_off,
+        'object_name': 'player_off',
+    },
+    'Substitution': {
+        'loader': load_substitution,
+        'object_name': 'substitution',
+    },
 }
 
 
@@ -177,8 +254,8 @@ def load_event_data(db_conn, match_id, season_name):
                 event.get('ball_out', None),
                 event.get('counterpress', None)
             ))
-        if event_type in event_loaders:
-            event_loaders[event_type](db_conn, event['id'], event[event_type.lower()], match_id, season_name)
+        if event_type in event_dict:
+            event_dict[event_type]['loader'](db_conn, event['id'], event.get(event_dict[event_type]['object_name']) or {})
 
 def testQ1():
     with db_conn.cursor() as cursor:
