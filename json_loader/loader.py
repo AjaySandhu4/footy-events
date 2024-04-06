@@ -164,12 +164,12 @@ def load_match_data(db_conn, match):
         
         if len(match['home_team'].get('managers', [])) > 0:
             home_manager = match['home_team']['managers'][0]
-            cursor.execute('''INSERT INTO manager (manager_id, manager_name, manager_nickname, manager_dob, country_name) VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING;''', (home_manager['id'], home_manager['name'], home_manager.get('nickname'), home_manager['dob'], home_manager['country']['name']))
+            cursor.execute('''INSERT INTO manager (manager_id, manager_name, manager_nickname, manager_dob, manager_country) VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING;''', (home_manager['id'], home_manager['name'], home_manager.get('nickname'), home_manager['dob'], home_manager['country']['name']))
         if len(match['away_team'].get('managers', [])) > 0:
             away_manager = match['away_team']['managers'][0]
-            cursor.execute('''INSERT INTO manager (manager_id, manager_name, manager_nickname, manager_dob, country_name) VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING;''', (away_manager['id'], away_manager['name'], away_manager.get('nickname'), away_manager['dob'], away_manager['country']['name']))
+            cursor.execute('''INSERT INTO manager (manager_id, manager_name, manager_nickname, manager_dob, manager_country) VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING;''', (away_manager['id'], away_manager['name'], away_manager.get('nickname'), away_manager['dob'], away_manager['country']['name']))
         if(match.get('referee')):
-            cursor.execute('''INSERT INTO referee (referee_id, referee_name, country_name) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;''', (match['referee']['id'], match['referee']['name'], match['referee']['country']['name']))
+            cursor.execute('''INSERT INTO referee (referee_id, referee_name, referee_country) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;''', (match['referee']['id'], match['referee']['name'], match['referee']['country']['name']))
         cursor.execute('''
             INSERT INTO matches (match_id, competition_id, season_id, match_date, kick_off, stadium_name, stadium_country, referee_id, home_team_id, home_manager_id, home_score, away_team_id, away_manager_id, away_score, match_week, competition_stage)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);

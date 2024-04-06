@@ -17,7 +17,7 @@ CREATE TABLE player (
     player_id INTEGER PRIMARY KEY,
     player_name TEXT NOT NULL, 
     player_nickname TEXT,
-    country_name TEXT NOT NULL
+    player_country TEXT NOT NULL
 );
 
 DROP TABLE IF EXISTS team;
@@ -33,14 +33,14 @@ CREATE TABLE manager (
     manager_name TEXT NOT NULL,
     manager_nickname TEXT,
     manager_dob DATE NOT NULL,
-    country_name TEXT NOT NULL
+    manager_country TEXT NOT NULL
 );
 
 DROP TABLE IF EXISTS referee;
 CREATE TABLE referee (
     referee_id INTEGER PRIMARY KEY,
     referee_name TEXT NOT NULL,
-    country_name TEXT NOT NULL
+    referee_country TEXT NOT NULL
 );
 
 DROP TABLE IF EXISTS matches;
