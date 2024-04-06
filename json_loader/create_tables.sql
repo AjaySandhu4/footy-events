@@ -88,11 +88,8 @@ CREATE TABLE events (
     event_type CHAR(24) NOT NULL,
     possession INTEGER NOT NULL,
     possession_team_id INTEGER NOT NULL,
-    -- possession_team CHAR(24) NOT NULL,
     play_pattern CHAR(24) NOT NULL,
-    -- team_name CHAR(24) NOT NULL,
     team_id INTEGER NOT NULL,
-    -- player_name TEXT NOT NULL,
     player_id INTEGER,
     position TEXT,
     location_x DECIMAL,
@@ -101,12 +98,10 @@ CREATE TABLE events (
     under_pressure BOOLEAN,
     off_camera BOOLEAN,
     ball_out BOOLEAN,
-    -- related_events CHAR(36),
     counterpress BOOLEAN,
 
     FOREIGN KEY (match_id) REFERENCES matches (match_id),
     FOREIGN KEY (player_id) REFERENCES player (player_id)
-    -- FOREIGN KEY (related_events) REFERENCES events (event_id)
 );
 
 DROP TABLE IF EXISTS related_event;
@@ -123,7 +118,6 @@ CREATE TABLE related_event (
 DROP TABLE IF EXISTS shot;
 CREATE TABLE shot (
     event_id CHAR(36) PRIMARY KEY,
-    -- season_name CHAR(24) NOT NULL,
     key_pass_id CHAR(36),
     end_location_x DECIMAL NOT NULL,
     end_location_y DECIMAL NOT NULL,
@@ -146,9 +140,6 @@ CREATE TABLE shot (
 DROP TABLE IF EXISTS pass;
 CREATE TABLE pass (
     event_id CHAR(36) PRIMARY KEY,
-    -- match_id INTEGER NOT NULL,
-    -- season_name CHAR(24) NOT NULL,
-    -- player_name TEXT NOT NULL,
     recipient_id INTEGER,
     pass_length DECIMAL NOT NULL,
     angle DECIMAL NOT NULL,
