@@ -161,6 +161,15 @@ def load_match_data(db_conn, match):
     with db_conn.cursor() as cursor:
         cursor.execute('''INSERT INTO team (team_id, team_name, team_country) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;''', (match['home_team']['home_team_id'], match['home_team']['home_team_name'], match['home_team']['country']['name']))
         cursor.execute('''INSERT INTO team (team_id, team_name, team_country) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;''', (match['away_team']['away_team_id'], match['away_team']['away_team_name'], match['away_team']['country']['name']))
+        
+        if len(match['home_team'].get('managers', [])) > 0:
+            home_manager = match['home_team']['managers'][0]
+            cursor.execute('''INSERT INTO manager (manager_id, manager_name, manager_nickname, manager_dob, country_name) VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING;''', (home_manager['id'], home_manager['name'], home_manager.get('nickname'), home_manager['dob'], home_manager['country']['name']))
+        if len(match['away_team'].get('managers', [])) > 0:
+            away_manager = match['away_team']['managers'][0]
+            cursor.execute('''INSERT INTO manager (manager_id, manager_name, manager_nickname, manager_dob, country_name) VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING;''', (away_manager['id'], away_manager['name'], away_manager.get('nickname'), away_manager['dob'], away_manager['country']['name']))
+        if(match.get('referee')):
+            cursor.execute('''INSERT INTO referee (referee_id, referee_name, country_name) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING;''', (match['referee']['id'], match['referee']['name'], match['referee']['country']['name']))
         cursor.execute('''
             INSERT INTO matches (match_id, competition_id, season_id, match_date, kick_off, stadium_name, stadium_country, referee_id, home_team_id, home_manager_id, home_score, away_team_id, away_manager_id, away_score, match_week, competition_stage)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
@@ -256,6 +265,13 @@ def load_event_data(db_conn, match_id, season_name):
             ))
         if event_type in event_dict:
             event_dict[event_type]['loader'](db_conn, event['id'], event.get(event_dict[event_type]['object_name']) or {})
+    for event in event_data:
+        for related_event_id in event.get('related_events', []):
+            with db_conn.cursor() as cursor:
+                cursor.execute('''
+                    INSERT INTO related_event (event_id, related_event_id) VALUES (%s, %s)
+                ''', (event['id'], related_event_id))
+    f.close()
 
 def testQ1():
     with db_conn.cursor() as cursor:

@@ -27,6 +27,22 @@ CREATE TABLE team (
     team_country CHAR(24) NOT NULL
 );
 
+DROP TABLE IF EXISTS manager;
+CREATE TABLE manager (
+    manager_id INTEGER PRIMARY KEY,
+    manager_name TEXT NOT NULL,
+    manager_nickname TEXT,
+    manager_dob DATE NOT NULL,
+    country_name TEXT NOT NULL
+);
+
+DROP TABLE IF EXISTS referee;
+CREATE TABLE referee (
+    referee_id INTEGER PRIMARY KEY,
+    referee_name TEXT NOT NULL,
+    country_name TEXT NOT NULL
+);
+
 DROP TABLE IF EXISTS matches;
 CREATE TABLE matches (
     match_id INTEGER PRIMARY KEY,
@@ -48,10 +64,10 @@ CREATE TABLE matches (
 
     FOREIGN KEY (competition_id, season_id) REFERENCES competition (competition_id, season_id),
     FOREIGN KEY (home_team_id) REFERENCES team (team_id),
-    FOREIGN KEY (away_team_id) REFERENCES team (team_id)
-    -- FOREIGN KEY (home_manager_id) REFERENCES manager (manager_id),
-    -- FOREIGN KEY (away_manager_id) REFERENCES manager (manager_id)
-    -- FOREIGN KEY (referee_id) REFERENCES referee (referee_id)
+    FOREIGN KEY (away_team_id) REFERENCES team (team_id),
+    FOREIGN KEY (home_manager_id) REFERENCES manager (manager_id),
+    FOREIGN KEY (away_manager_id) REFERENCES manager (manager_id),
+    FOREIGN KEY (referee_id) REFERENCES referee (referee_id)
 );
 
 -- DROP TABLE IF EXISTS lineup;
@@ -91,6 +107,16 @@ CREATE TABLE events (
     FOREIGN KEY (match_id) REFERENCES matches (match_id),
     FOREIGN KEY (player_id) REFERENCES player (player_id)
     -- FOREIGN KEY (related_events) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS related_event;
+CREATE TABLE related_event (
+    event_id CHAR(36),
+    related_event_id CHAR(36),
+
+    PRIMARY KEY (event_id, related_event_id),
+    FOREIGN KEY (event_id) REFERENCES events (event_id),
+    FOREIGN KEY (related_event_id) REFERENCES events (event_id)
 );
 
 
