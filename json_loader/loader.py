@@ -142,10 +142,9 @@ def iterate_over_matches(db_conn):
                 season_id = season_file.strip('.json')
                 if season_id in season_id_by_competition_id[competition_id]:
                     print(season_id)
-                    load_season_data(db_conn, os.path.join(competition_directory, season_file), season_name_by_season_id[season_id])
+                    load_season_data(db_conn, os.path.join(competition_directory, season_file), competition_id, season_id)
 
-def load_season_data(db_conn, season_file, season_name):
-    print(season_name)
+def load_season_data(db_conn, season_file, competition_id, season_id):
     f = open(season_file)
 
     season_data = json.load(f)
@@ -154,7 +153,7 @@ def load_season_data(db_conn, season_file, season_name):
         match_id = match['match_id']
         load_match_data(db_conn, match)
         load_lineup_data(db_conn, match_id) 
-        load_event_data(db_conn, match_id, season_name)
+        load_event_data(db_conn, match_id, competition_id, season_id)
     f.close()
 
 def load_match_data(db_conn, match):
@@ -201,15 +200,16 @@ def load_lineup_data(db_conn, match_id):
     lineup_data = json.load(f)
     with db_conn.cursor() as cursor:
         for team in lineup_data:
-            # print(team['team_name'])
             for player in team['lineup']:
-                # print('\t'+player['player_name'])
-                # cursor.execute('''INSERT INTO player VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING;''', (player['player_id'], player['player_name'], team['team_name'], player['jersey_number'], player['country']['name']))
                 cursor.execute('''INSERT INTO player VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING;''', (player['player_id'], player['player_name'], player['player_nickname'], player['country']['name']))
+                cursor.execute('''INSERT INTO lineup (match_id, team_id, player_id, jersey_number) VALUES (%s, %s, %s, %s);''', (match_id, team['team_id'], player['player_id'], player['jersey_number']))
+                for position in player.get('positions', []):
+                    cursor.execute('''INSERT INTO position (match_id, player_id, team_id, position_name, position_from, position_to, from_period, to_period, start_reason, end_reason) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''', (match_id, player['player_id'], team['team_id'], position['position'], position['from'], position.get('to'), position.get('from_period'), position.get('to_period'), position.get('start_reason'), position.get('end_reason')))
+                for card in player.get('cards', []):
+                    cursor.execute('''INSERT INTO cards (match_id, player_id, team_id, card_type, card_time, card_period) VALUES (%s, %s, %s, %s, %s, %s);''', (match_id, player['player_id'], team['team_id'], card['card_type'], card['time'], card['period']))
     f.close()
 
-def load_event_data(db_conn, match_id, season_name):
-    # event_filename = os.path.join('/Users/ajay/Documents/COMP3005/project/open-data/data/events', str(match_id)+'.json')
+def load_event_data(db_conn, match_id, competition_id, season_id):
     event_filename = os.path.join(dir_path, 'open-data/data/events', str(match_id)+'.json')
     f = open(event_filename)
     event_data = json.load(f)
@@ -220,6 +220,8 @@ def load_event_data(db_conn, match_id, season_name):
                 INSERT INTO events (
                     event_id, 
                     match_id, 
+                    competition_id,
+                    season_id,
                     event_index, 
                     event_timestamp, 
                     event_period,
@@ -238,11 +240,14 @@ def load_event_data(db_conn, match_id, season_name):
                     under_pressure, 
                     off_camera, 
                     ball_out,
-                    counterpress
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    counterpress,
+                    tactics_formation
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ''', (
                 event['id'], 
                 match_id, 
+                competition_id,
+                season_id,
                 event['index'], 
                 event['timestamp'], 
                 event['period'],
@@ -261,7 +266,8 @@ def load_event_data(db_conn, match_id, season_name):
                 event.get('under_pressure', None),
                 event.get('off_camera', None), 
                 event.get('ball_out', None),
-                event.get('counterpress', None)
+                event.get('counterpress', None),
+                event.get('tactics', {}).get('formation', None)
             ))
         if event_type in event_dict:
             event_dict[event_type]['loader'](db_conn, event['id'], event.get(event_dict[event_type]['object_name']) or {})
