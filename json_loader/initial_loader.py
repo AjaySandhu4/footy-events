@@ -3,22 +3,21 @@ from pprint import pprint
 from global_ import *
 
 def init():
-    pwd = os.environ['POSTGRES_PWD']
-    setup_database('postgres', pwd)
+    setup_database()
     create_tables()
     return db_conn
 
-# Creates database 'project_test' and creates global connection to it
-def setup_database(user, pwd):
+# Creates database and creates global connection to it
+def setup_database():
     try:
-        with psycopg.connect(f'dbname=postgres user={user} password={pwd} host=localhost port=5432', autocommit=True) as conn:
+        with psycopg.connect(f'dbname=postgres user={db_username} password={db_password} host={db_host} port={db_port}', autocommit=True) as conn:
             with conn.cursor() as cursor:
-                cursor.execute('DROP DATABASE IF EXISTS project_test')
-                cursor.execute('CREATE DATABASE project_test')
+                cursor.execute(f'DROP DATABASE IF EXISTS {db_name}')
+                cursor.execute(f'CREATE DATABASE {db_name}')
 
         global db_conn
         db_conn = psycopg.connect(
-                f'dbname=project_test user={user} password={pwd} host=localhost port=5432'
+                f'dbname={db_name} user={db_username} password={db_password} host={db_host} port={db_port}'
         )
     except psycopg.OperationalError as e:
         print('Failed to connect to database', e)
