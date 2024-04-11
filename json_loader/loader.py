@@ -1,6 +1,5 @@
 import psycopg
 from pprint import pprint
-# import sys
 import os
 import json
 from initial_loader import *
@@ -106,6 +105,7 @@ def main():
     db_conn = init()
     insert_competitions(db_conn)
     iterate_over_matches(db_conn)
+    create_indices(db_conn)
     db_conn.commit()
     db_conn.close()
 
@@ -115,9 +115,7 @@ def insert_competitions(db_conn):
         competitions_data = json.load(competitions_file)
         with db_conn.cursor() as cursor:
             for competition in competitions_data:
-                # pprint(competition)
                 if (str(competition['competition_id']) in season_id_by_competition_id) and (str(competition['season_id']) in season_name_by_season_id):
-                    pprint(competition)
                     cursor.execute('''
                         INSERT INTO competition (competition_id, season_id, competition_name, season_name, competition_country, competition_gender, competition_youth, competition_international)
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
@@ -132,16 +130,13 @@ def insert_competitions(db_conn):
                      competition['competition_international']))
 
 def iterate_over_matches(db_conn):
-    print('Iterating over matches')
     directory = os.path.join(dir_path, 'open-data/data/matches')
     for competition_id in os.listdir(directory):
-        print('competition_id',competition_id)
         competition_directory = os.path.join(directory, competition_id)
         if(competition_id in season_id_by_competition_id):
             for season_file in os.listdir(competition_directory):
                 season_id = season_file.strip('.json')
                 if season_id in season_id_by_competition_id[competition_id]:
-                    print(season_id)
                     load_season_data(db_conn, os.path.join(competition_directory, season_file), competition_id, season_id)
 
 def load_season_data(db_conn, season_file, competition_id, season_id):
@@ -193,7 +188,6 @@ def load_match_data(db_conn, match):
         ))
 
 def load_lineup_data(db_conn, match_id):
-    print('Loading lineup')
     lineup_filename = os.path.join(dir_path, 'open-data/data/lineups', str(match_id)+'.json')
     f = open(lineup_filename)
 
@@ -279,26 +273,10 @@ def load_event_data(db_conn, match_id, competition_id, season_id):
                 ''', (event['id'], related_event_id))
     f.close()
 
-def testQ1():
+def create_indices(db_conn):
     with db_conn.cursor() as cursor:
-        # cursor.execute('''SELECT player_name, AVG(xg) as avg_xg
-        #     FROM shots
-        #     WHERE season_name = 'La Liga 2020/2021'
-        #     GROUP BY player_name
-        #     ORDER BY avg_xg DESC; 
-        # ''')
-        cursor.execute('''  
-                            SELECT p.player_name, AVG(s.statsbomb_xg) as avg_xg
-                            FROM shot s
-                            INNER JOIN events e ON s.event_id = e.event_id
-                            INNER JOIN player p ON e.player_id = p.player_id
-                            INNER JOIN matches m ON e.match_id = m.match_id
-                            INNER JOIN competition c ON m.competition_id = c.competition_id
-                                    AND m.season_id = c.season_id
-                            WHERE c.competition_name = 'La Liga' AND c.season_name = '2020/2021'
-                            GROUP BY p.player_id
-                            ORDER BY avg_xg DESC; 
-                       ''')
+        with open(os.path.join(dir_path, 'create_indices.sql')) as f:
+            cursor.execute(f.read())
 
 if __name__ == '__main__':
     main()
