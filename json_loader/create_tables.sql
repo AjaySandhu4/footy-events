@@ -120,8 +120,6 @@ DROP TABLE IF EXISTS events;
 CREATE TABLE events (
     event_id CHAR(36) PRIMARY KEY,
     match_id INTEGER NOT NULL,
-    competition_id INTEGER NOT NULL,
-    season_id INTEGER NOT NULL,
     event_index INTEGER NOT NULL,
     event_timestamp TIME NOT NULL,
     event_period INTEGER NOT NULL,
@@ -146,8 +144,7 @@ CREATE TABLE events (
 
     FOREIGN KEY (match_id) REFERENCES matches (match_id),
     FOREIGN KEY (player_id) REFERENCES player (player_id),
-    FOREIGN KEY (team_id) REFERENCES team (team_id),
-    FOREIGN KEY (competition_id, season_id) REFERENCES competition (competition_id, season_id)
+    FOREIGN KEY (team_id) REFERENCES team (team_id)
 );
 
 DROP TABLE IF EXISTS related_event;

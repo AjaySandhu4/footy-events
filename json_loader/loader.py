@@ -210,8 +210,6 @@ def load_event_data(db_conn, match_id, competition_id, season_id):
                 INSERT INTO events (
                     event_id, 
                     match_id, 
-                    competition_id,
-                    season_id,
                     event_index, 
                     event_timestamp, 
                     event_period,
@@ -233,12 +231,10 @@ def load_event_data(db_conn, match_id, competition_id, season_id):
                     counterpress,
                     tactics_formation,
                     outcome
-                ) VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ''', (
                 event['id'], 
                 match_id, 
-                competition_id,
-                season_id,
                 event['index'], 
                 event['timestamp'], 
                 event['period'],
