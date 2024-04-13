@@ -224,10 +224,29 @@ CREATE TABLE pass (
 DROP TABLE IF EXISTS dribble;
 CREATE TABLE dribble (
     event_id CHAR(36) PRIMARY KEY,
+    competition_id INTEGER NOT NULL,
+    season_id INTEGER NOT NULL,
+    player_id INTEGER NOT NULL,
     overrun BOOLEAN,
     nutmeg BOOLEAN,
     no_touch BOOLEAN,
+    outcome CHAR(10),
 
+    FOREIGN KEY (competition_id, season_id) REFERENCES competition (competition_id, season_id),
+    FOREIGN KEY (player_id) REFERENCES player (player_id),
+    FOREIGN KEY (event_id) REFERENCES events (event_id)
+);
+
+DROP TABLE IF EXISTS dribbled_past;
+CREATE TABLE dribbled_past (
+    event_id CHAR(36) PRIMARY KEY,
+    competition_id INTEGER NOT NULL,
+    season_id INTEGER NOT NULL,
+    player_id INTEGER NOT NULL,
+    outcome CHAR(10),
+
+    FOREIGN KEY (competition_id, season_id) REFERENCES competition (competition_id, season_id),
+    FOREIGN KEY (player_id) REFERENCES player (player_id),
     FOREIGN KEY (event_id) REFERENCES events (event_id)
 );
 

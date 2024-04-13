@@ -98,21 +98,46 @@ def load_pass(db_conn, event_id, pass_event, competition_id, season_id, player_i
             pass_event.get('technique', {}).get('name')
         ))
 
-def load_dribble(db_conn, event_id, dribble_event):
+def load_dribble(db_conn, event_id, dribble_event, competition_id, season_id, player_id, team_id):
     with db_conn.cursor() as cursor:
         cursor.execute('''
             INSERT INTO dribble (
             event_id, 
+            competition_id,
+            season_id,
+            player_id,
+            outcome,
             overrun, 
             no_touch,
             nutmeg
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        ''', (
+            event_id, 
+            competition_id,
+            season_id,
+            player_id,
+            dribble_event.get('outcome', {}).get('name'),
+            dribble_event.get('overrun'), 
+            dribble_event.get('no_touch'), 
+            dribble_event.get('nutmeg')
+        ))
+
+def load_dribbled_past(db_conn, event_id, dribbled_past_event, competition_id, season_id, player_id, team_id):
+    with db_conn.cursor() as cursor:
+        cursor.execute('''
+            INSERT INTO dribbled_past (
+            event_id, 
+            competition_id,
+            season_id,
+            player_id
             ) VALUES (%s, %s, %s, %s)
         ''', (
             event_id, 
-            dribble_event.get('overrun'), 
-            dribble_event.get('no_touch'), 
-            dribble_event.get('nutmeg'), 
+            competition_id,
+            season_id,
+            player_id
         ))
+
 
 def load_bad_behaviour(db_conn, event_id, bad_behaviour_event):
     with db_conn.cursor() as cursor:

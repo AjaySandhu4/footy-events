@@ -380,11 +380,11 @@ def Q_9(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """ 
-                SELECT player.player_name, COUNT(events.event_id) as num_dribbles
-                FROM events
+                SELECT player.player_name, COUNT(dribble.event_id) as num_dribbles
+                FROM dribble
                 NATURAL JOIN player
                 NATURAL JOIN competition c
-                WHERE c.competition_name = 'La Liga' AND events.event_type = 'Dribble' AND events.outcome = 'Complete'
+                WHERE c.competition_name = 'La Liga' AND dribble.outcome = 'Complete'
                 GROUP BY player.player_id
                 ORDER BY num_dribbles DESC;
             """
@@ -406,11 +406,11 @@ def Q_10(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """ 
-                SELECT player.player_name, COUNT(events.event_id) as num_dribbles_past
-                FROM events
+                SELECT player.player_name, COUNT(dribbled_past.event_id) as num_dribbles_past
+                FROM dribbled_past
                 NATURAL JOIN player
                 NATURAL JOIN competition c
-                WHERE c.competition_name = 'La Liga' AND events.event_type = 'Dribbled Past'
+                WHERE c.competition_name = 'La Liga' AND c.season_name = '2020/2021'
                 GROUP BY player.player_id
                 ORDER BY num_dribbles_past ASC;
             """
