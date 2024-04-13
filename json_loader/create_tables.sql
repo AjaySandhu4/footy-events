@@ -97,7 +97,8 @@ CREATE TABLE position (
     end_reason TEXT NOT NULL,
 
     PRIMARY KEY (player_id, match_id, team_id, position_name, position_from),
-    FOREIGN KEY (match_id, player_id, team_id) REFERENCES lineup (match_id, player_id, team_id)
+    FOREIGN KEY (player_id) REFERENCES player (player_id),
+    FOREIGN KEY (match_id) REFERENCES matches (match_id)
 );
 
 DROP TABLE IF EXISTS cards;
@@ -110,8 +111,9 @@ CREATE TABLE cards (
     card_reason TEXT,
     card_period INTEGER NOT NULL,
 
-    PRIMARY KEY (player_id, match_id, team_id, card_time),
-    FOREIGN KEY (match_id, player_id, team_id) REFERENCES lineup (match_id, player_id, team_id)
+    PRIMARY KEY (player_id, match_id, team_id, card_time, card_type),
+    FOREIGN KEY (player_id) REFERENCES player (player_id),
+    FOREIGN KEY (match_id) REFERENCES matches (match_id)
 );
 
 DROP TABLE IF EXISTS events;
@@ -140,6 +142,7 @@ CREATE TABLE events (
     ball_out BOOLEAN,
     counterpress BOOLEAN,
     tactics_formation INTEGER,
+    outcome CHAR(24),
 
     FOREIGN KEY (match_id) REFERENCES matches (match_id),
     FOREIGN KEY (player_id) REFERENCES player (player_id),
@@ -174,7 +177,6 @@ CREATE TABLE shot (
     technique CHAR(13),
     body_part CHAR(10),
     shot_type CHAR(10),
-    outcome CHAR(20),
 
     FOREIGN KEY (event_id) REFERENCES events (event_id),
     FOREIGN KEY (key_pass_id) REFERENCES events (event_id)
@@ -197,18 +199,17 @@ CREATE TABLE pass (
     backheel BOOLEAN,
     deflected BOOLEAN,
     miscommunication BOOLEAN,
-    outcome CHAR(16),
     body_part CHAR(24),
     pass_type CHAR(24),
     technique CHAR(24),
 
-    FOREIGN KEY (event_id) REFERENCES events (event_id)
+    FOREIGN KEY (event_id) REFERENCES events (event_id),
+    FOREIGN KEY (recipient_id) REFERENCES player (player_id)
 );
 
 DROP TABLE IF EXISTS dribble;
 CREATE TABLE dribble (
     event_id CHAR(36) PRIMARY KEY,
-    outcome CHAR(24) NOT NULL,
     overrun BOOLEAN,
     nutmeg BOOLEAN,
     no_touch BOOLEAN,
@@ -220,14 +221,6 @@ DROP TABLE IF EXISTS bad_behaviour;
 CREATE TABLE bad_behaviour (
     event_id CHAR(36) PRIMARY KEY,
     card_name TEXT,
-
-    FOREIGN KEY (event_id) REFERENCES events (event_id)
-);
-
-DROP TABLE IF EXISTS ball_receipt;
-CREATE TABLE ball_receipt (
-    event_id CHAR(36) PRIMARY KEY,
-    outcome TEXT,
 
     FOREIGN KEY (event_id) REFERENCES events (event_id)
 );
@@ -273,7 +266,6 @@ DROP TABLE IF EXISTS duel;
 CREATE TABLE duel (
     event_id CHAR(36) PRIMARY KEY,
     duel_type TEXT,
-    outcome TEXT,
 
     FOREIGN KEY (event_id) REFERENCES events (event_id)
 );
@@ -307,7 +299,6 @@ CREATE TABLE goalkeeper (
     technique TEXT,
     body_part TEXT,
     goalkeeper_type TEXT,
-    outcome TEXT,
 
     FOREIGN KEY (event_id) REFERENCES events (event_id)
 );
@@ -337,14 +328,6 @@ CREATE TABLE injury_stoppage (
     FOREIGN KEY (event_id) REFERENCES events (event_id)
 );
 
-DROP TABLE IF EXISTS interception;
-CREATE TABLE interception (
-    event_id CHAR(36) PRIMARY KEY,
-    outcome TEXT,
-
-    FOREIGN KEY (event_id) REFERENCES events (event_id)
-);
-
 DROP TABLE IF EXISTS miscontrol;
 CREATE TABLE miscontrol (
     event_id CHAR(36) PRIMARY KEY,
@@ -365,15 +348,6 @@ DROP TABLE IF EXISTS substitution;
 CREATE TABLE substitution (
     event_id CHAR(36) PRIMARY KEY,
     replacement_id INTEGER,
-    outcome TEXT,
-
-    FOREIGN KEY (event_id) REFERENCES events (event_id)
-);
-
-DROP TABLE IF EXISTS fifty_fifty;
-CREATE TABLE fifty_fifty (
-    event_id CHAR(36) PRIMARY KEY,
-    outcome TEXT,
 
     FOREIGN KEY (event_id) REFERENCES events (event_id)
 );

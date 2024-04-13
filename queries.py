@@ -388,12 +388,11 @@ def Q_9(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
     
     query = """ 
-                SELECT player.player_name, COUNT(dribble.event_id) as num_dribbles
-                FROM dribble
-                NATURAL JOIN events
+                SELECT player.player_name, COUNT(events.event_id) as num_dribbles
+                FROM events
                 NATURAL JOIN player
                 NATURAL JOIN competition c
-                WHERE c.competition_name = 'La Liga' AND dribble.outcome = 'Complete'
+                WHERE c.competition_name = 'La Liga' AND events.event_type = 'Dribble' AND events.outcome = 'Complete'
                 GROUP BY player.player_id
                 ORDER BY num_dribbles DESC;
             """

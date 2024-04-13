@@ -19,10 +19,9 @@ def load_shot(db_conn, event_id, shot_event):
             deflected, 
             technique, 
             body_part, 
-            shot_type, 
-            outcome
+            shot_type
             ) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', (
             event_id, 
             shot_event.get('key_pass_id'), 
@@ -37,8 +36,7 @@ def load_shot(db_conn, event_id, shot_event):
             shot_event.get('deflected'), 
             shot_event.get('technique', {}).get('name'), 
             shot_event.get('body_part', {}).get('name'), 
-            shot_event.get('type', {}).get('name'), 
-            shot_event.get('outcome', {}).get('name')
+            shot_event.get('type', {}).get('name')
         ))
 
 def load_pass(db_conn, event_id, pass_event):
@@ -60,11 +58,10 @@ def load_pass(db_conn, event_id, pass_event):
             backheel,
             deflected,
             miscommunication,
-            outcome,
             body_part,
             pass_type,
             technique 
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', (
             event_id, 
             pass_event.get('recipient', {}).get('id'), 
@@ -81,7 +78,6 @@ def load_pass(db_conn, event_id, pass_event):
             pass_event.get('backheel'), 
             pass_event.get('deflected'), 
             pass_event.get('miscommunication'), 
-            pass_event.get('outcome', {}).get('name'), 
             pass_event.get('body_part', {}).get('name'), 
             pass_event.get('type', {}).get('name'), 
             pass_event.get('technique', {}).get('name')
@@ -92,14 +88,12 @@ def load_dribble(db_conn, event_id, dribble_event):
         cursor.execute('''
             INSERT INTO dribble (
             event_id, 
-            outcome, 
             overrun, 
             no_touch,
             nutmeg
-            ) VALUES (%s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s)
         ''', (
             event_id, 
-            dribble_event.get('outcome', {}).get('name'), 
             dribble_event.get('overrun'), 
             dribble_event.get('no_touch'), 
             dribble_event.get('nutmeg'), 
@@ -115,18 +109,6 @@ def load_bad_behaviour(db_conn, event_id, bad_behaviour_event):
         ''', (
             event_id, 
             bad_behaviour_event.get('card', {}).get('name'), 
-        ))
-
-def load_ball_receipt(db_conn, event_id, ball_receipt_event):
-    with db_conn.cursor() as cursor:
-        cursor.execute('''
-            INSERT INTO ball_receipt (
-            event_id, 
-            outcome
-            ) VALUES (%s, %s)
-        ''', (
-            event_id, 
-            ball_receipt_event.get('outcome', {}).get('name')
         ))
 
 def load_ball_recovery(db_conn, event_id, ball_recovery_event):
@@ -192,12 +174,10 @@ def load_duel(db_conn, event_id, duel_event):
         cursor.execute('''
             INSERT INTO duel (
             event_id, 
-            outcome,
             duel_type
-            ) VALUES (%s, %s, %s)
+            ) VALUES (%s, %s)
         ''', (
             event_id, 
-            duel_event.get('outcome', {}).get('name'),
             duel_event.get('type', {}).get('name'),
         ))
 
@@ -245,15 +225,13 @@ def load_goalkeeper(db_conn, event_id, goalkeeper_event):
             position,
             body_part,
             goalkeeper_type,
-            outcome,
             technique
-            ) VALUES (%s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s)
         ''', (
             event_id, 
             goalkeeper_event.get('position', {}).get('name'),
             goalkeeper_event.get('body_part', {}).get('name'),
             goalkeeper_event.get('type', {}).get('name'),
-            goalkeeper_event.get('outcome', {}).get('name'),
             goalkeeper_event.get('technique', {}).get('name'),
         ))
 
@@ -295,18 +273,6 @@ def load_injury_stoppage(db_conn, event_id, injury_stoppage_event):
             injury_stoppage_event.get('in_chain')
         ))
 
-def load_interception(db_conn, event_id, interception_event):
-    with db_conn.cursor() as cursor:
-        cursor.execute('''
-            INSERT INTO interception (
-            event_id, 
-            outcome
-            ) VALUES (%s, %s)
-        ''', (
-            event_id, 
-            interception_event.get('outcome', {}).get('name')
-        ))
-
 def load_miscontrol(db_conn, event_id, miscontrol_event):
     with db_conn.cursor() as cursor:
         cursor.execute('''
@@ -336,11 +302,9 @@ def load_substitution(db_conn, event_id, substitution_event):
         cursor.execute('''
             INSERT INTO substitution (
             event_id, 
-            replacement_id,
-            outcome
-            ) VALUES (%s, %s, %s)
+            replacement_id
+            ) VALUES (%s, %s)
         ''', (
             event_id, 
             substitution_event.get('replacement', {}).get('id'),
-            substitution_event.get('outcome', {}).get('name')
         ))

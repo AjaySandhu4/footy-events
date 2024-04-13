@@ -34,10 +34,6 @@ event_dict = {
         'loader': load_bad_behaviour,
         'object_name': 'bad_behaviour',
     },
-    'Ball Receipt*': {
-        'loader': load_ball_receipt,
-        'object_name': 'ball_receipt',
-    },
     'Ball Recovery': {
         'loader': load_ball_recovery,
         'object_name': 'ball_recovery',
@@ -81,10 +77,6 @@ event_dict = {
     'Injury Stoppage': {
         'loader': load_injury_stoppage,
         'object_name': 'injury_stoppage',
-    },
-    'Interception': {
-        'loader': load_interception,
-        'object_name': 'interception',
     },
     'Miscontrol': {
         'loader': load_miscontrol,
@@ -235,8 +227,9 @@ def load_event_data(db_conn, match_id, competition_id, season_id):
                     off_camera, 
                     ball_out,
                     counterpress,
-                    tactics_formation
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    tactics_formation,
+                    outcome
+                ) VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ''', (
                 event['id'], 
                 match_id, 
@@ -261,7 +254,8 @@ def load_event_data(db_conn, match_id, competition_id, season_id):
                 event.get('off_camera', None), 
                 event.get('ball_out', None),
                 event.get('counterpress', None),
-                event.get('tactics', {}).get('formation', None)
+                event.get('tactics', {}).get('formation', None),
+                event.get(event_dict[event_type]['object_name'], {}).get('outcome', {}).get('name') if event_type in event_dict else None
             ))
         if event_type in event_dict:
             event_dict[event_type]['loader'](db_conn, event['id'], event.get(event_dict[event_type]['object_name']) or {})
