@@ -164,6 +164,10 @@ CREATE TABLE related_event (
 DROP TABLE IF EXISTS shot;
 CREATE TABLE shot (
     event_id CHAR(36) PRIMARY KEY,
+    competition_id INTEGER NOT NULL,
+    season_id INTEGER NOT NULL,
+    player_id INTEGER NOT NULL,
+    team_id INTEGER NOT NULL,
     key_pass_id CHAR(36),
     end_location_x DECIMAL NOT NULL,
     end_location_y DECIMAL NOT NULL,
@@ -178,6 +182,9 @@ CREATE TABLE shot (
     body_part CHAR(10),
     shot_type CHAR(10),
 
+    FOREIGN KEY (competition_id, season_id) REFERENCES competition (competition_id, season_id),
+    FOREIGN KEY (player_id) REFERENCES player (player_id),
+    FOREIGN KEY (team_id) REFERENCES team (team_id),
     FOREIGN KEY (event_id) REFERENCES events (event_id),
     FOREIGN KEY (key_pass_id) REFERENCES events (event_id)
 );
@@ -185,6 +192,10 @@ CREATE TABLE shot (
 DROP TABLE IF EXISTS pass;
 CREATE TABLE pass (
     event_id CHAR(36) PRIMARY KEY,
+    competition_id INTEGER NOT NULL,
+    season_id INTEGER NOT NULL,
+    player_id INTEGER NOT NULL,
+    team_id INTEGER NOT NULL,
     recipient_id INTEGER,
     pass_length DECIMAL NOT NULL,
     angle DECIMAL NOT NULL,
@@ -203,6 +214,9 @@ CREATE TABLE pass (
     pass_type CHAR(24),
     technique CHAR(24),
 
+    FOREIGN KEY (competition_id, season_id) REFERENCES competition (competition_id, season_id),
+    FOREIGN KEY (player_id) REFERENCES player (player_id),
+    FOREIGN KEY (team_id) REFERENCES team (team_id),
     FOREIGN KEY (event_id) REFERENCES events (event_id),
     FOREIGN KEY (recipient_id) REFERENCES player (player_id)
 );

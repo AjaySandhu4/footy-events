@@ -1,12 +1,15 @@
 import psycopg
 from pprint import pprint
 
-def load_shot(db_conn, event_id, shot_event):
+def load_shot(db_conn, event_id, shot_event, competition_id, season_id, player_id, team_id):
     with db_conn.cursor() as cursor:
-        # cursor.execute('''INSERT INTO shot (event_id, match_id, season_name, player_name, xg) VALUES (%s, %s, %s, %s, %s);''', (shot_event['id'], match_id, season_name, shot_event['player']['name'], shot_event['shot']['statsbomb_xg']))
         cursor.execute('''
             INSERT INTO shot (
             event_id, 
+            competition_id,
+            season_id,
+            player_id,
+            team_id,
             key_pass_id, 
             end_location_x, 
             end_location_y, 
@@ -21,9 +24,13 @@ def load_shot(db_conn, event_id, shot_event):
             body_part, 
             shot_type
             ) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', (
             event_id, 
+            competition_id,
+            season_id,
+            player_id,
+            team_id,
             shot_event.get('key_pass_id'), 
             shot_event.get('end_location')[0] if shot_event.get('end_location') else None, 
             shot_event.get('end_location')[1] if shot_event.get('end_location') else None, 
@@ -39,11 +46,15 @@ def load_shot(db_conn, event_id, shot_event):
             shot_event.get('type', {}).get('name')
         ))
 
-def load_pass(db_conn, event_id, pass_event):
+def load_pass(db_conn, event_id, pass_event, competition_id, season_id, player_id, team_id):
     with db_conn.cursor() as cursor:
         cursor.execute('''
             INSERT INTO pass (
             event_id, 
+            competition_id,
+            season_id,
+            player_id,
+            team_id,
             recipient_id, 
             pass_length, 
             angle, 
@@ -61,9 +72,13 @@ def load_pass(db_conn, event_id, pass_event):
             body_part,
             pass_type,
             technique 
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', (
             event_id, 
+            competition_id,
+            season_id,
+            player_id,
+            team_id,
             pass_event.get('recipient', {}).get('id'), 
             pass_event.get('length'), 
             pass_event.get('angle'), 

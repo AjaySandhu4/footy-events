@@ -257,7 +257,9 @@ def load_event_data(db_conn, match_id, competition_id, season_id):
                 event.get('tactics', {}).get('formation', None),
                 event.get(event_dict[event_type]['object_name'], {}).get('outcome', {}).get('name') if event_type in event_dict else None
             ))
-        if event_type in event_dict:
+        if event_type == 'Shot' or event_type == 'Pass':
+                event_dict[event_type]['loader'](db_conn, event['id'], event.get(event_dict[event_type]['object_name']) or {}, competition_id, season_id, event.get('player', {}).get('id'), event.get('team', {}).get('id'))
+        elif event_type in event_dict:
             event_dict[event_type]['loader'](db_conn, event['id'], event.get(event_dict[event_type]['object_name']) or {})
     for event in event_data:
         for related_event_id in event.get('related_events', []):

@@ -172,7 +172,6 @@ def Q_1(cursor, conn, execution_time):
     query = """
                 SELECT player.player_name, AVG(shot.statsbomb_xg) as avg_xg
                 FROM shot
-                NATURAL JOIN events
                 NATURAL JOIN player
                 NATURAL JOIN competition c
                 WHERE c.competition_name = 'La Liga' AND c.season_name = '2020/2021'
@@ -200,7 +199,6 @@ def Q_2(cursor, conn, execution_time):
     query = """ 
                 SELECT player.player_name, COUNT(shot.event_id) as num_shots
                 FROM shot
-                NATURAL JOIN events
                 NATURAL JOIN player
                 NATURAL JOIN competition c
                 WHERE c.competition_name = 'La Liga' AND c.season_name = '2020/2021'
@@ -228,7 +226,6 @@ def Q_3(cursor, conn, execution_time):
     query = """ 
                 SELECT player.player_name, COUNT(shot.event_id) as num_shots
                 FROM shot
-                NATURAL JOIN events
                 NATURAL JOIN player
                 NATURAL JOIN competition c
                 WHERE c.competition_name = 'La Liga' AND shot.first_time
@@ -255,7 +252,6 @@ def Q_4(cursor, conn, execution_time):
     query = """ 
                 SELECT team.team_name, COUNT(pass.event_id) as num_passes
                 FROM pass
-                NATURAL JOIN events
                 NATURAL JOIN team
                 NATURAL JOIN competition c
                 WHERE c.competition_name = 'La Liga' AND c.season_name = '2020/2021'
@@ -282,7 +278,6 @@ def Q_5(cursor, conn, execution_time):
     query = """ 
                 SELECT player.player_name, COUNT(pass.event_id) as num_passes_received
                 FROM pass
-                NATURAL JOIN events
                 INNER JOIN player ON pass.recipient_id = player.player_id
                 NATURAL JOIN competition c
                 WHERE c.competition_name = 'Premier League' AND c.season_name = '2003/2004'
@@ -309,7 +304,6 @@ def Q_6(cursor, conn, execution_time):
     query = """ 
                 SELECT team.team_name, COUNT(shot.event_id) as num_shots
                 FROM shot
-                NATURAL JOIN events
                 NATURAL JOIN team
                 NATURAL JOIN competition c
                 WHERE c.competition_name = 'Premier League' AND c.season_name = '2003/2004'
@@ -336,7 +330,6 @@ def Q_7(cursor, conn, execution_time):
     query = """ 
                 SELECT player.player_name, COUNT(pass.event_id) as num_passes
                 FROM pass
-                NATURAL JOIN events
                 NATURAL JOIN player
                 NATURAL JOIN competition c
                 WHERE c.competition_name = 'La Liga' AND c.season_name = '2020/2021' AND pass.technique = 'Through Ball'
@@ -363,7 +356,6 @@ def Q_8(cursor, conn, execution_time):
     query = """ 
                 SELECT team.team_name, COUNT(pass.event_id) as num_passes
                 FROM pass
-                NATURAL JOIN events
                 NATURAL JOIN team
                 NATURAL JOIN competition c
                 WHERE c.competition_name = 'La Liga' AND c.season_name = '2020/2021' AND pass.technique = 'Through Ball'
